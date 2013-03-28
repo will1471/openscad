@@ -150,6 +150,7 @@ CONFIG(skip-version-check) {
 
 # Application configuration
 macx:CONFIG += mdi
+DEFINES += CGAL_FAST
 CONFIG += cgal
 CONFIG += opencsg
 CONFIG += boost
