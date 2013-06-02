@@ -170,7 +170,7 @@ MainWindow::MainWindow(const QString &filename)
 	connect(this->cgalworker, SIGNAL(done(CGAL_Nef_polyhedron *)), 
 					this, SLOT(actionRenderCGALDone(CGAL_Nef_polyhedron *)));
 #endif
-	this->tempFile = NULL;
+	this->backupFile = NULL;
 	top_ctx.registerBuiltin();
 
 	this->openglbox = NULL;
@@ -911,17 +911,6 @@ void MainWindow::actionOpenExample()
 	}
 }
 
-void MainWindow::writeBackup(QFile * file)
-{
-	// see MainWindow::saveBackup()
-	file->resize(0);
-	QTextStream writer(file);
-	writer.setCodec("UTF-8");
-	writer << this->editor->toPlainText();
-
-	PRINTB("Saved backup file: %s", file->fileName().toLocal8Bit().constData());
-}
-
 void MainWindow::saveBackup()
 {
 	std::string path = PlatformUtils::backupPath();
@@ -930,36 +919,33 @@ void MainWindow::saveBackup()
 		return;
 	}
 
+	if (this->backupFile) { // have a backup file
+	    delete this->backupFile; // remove it - could have changed filename ect...
+	}
+
 	QString backupPath = QString::fromStdString(path);
 	if (! backupPath.endsWith("/")) backupPath.append("/");
 
 	if (this->fileName.isEmpty()) {
-		if (! this->tempFile) {
-			this->tempFile = new QTemporaryFile(backupPath.append("unsaved-backup-XXXXXXXX.scad"));
-		}
-
-		if ((! this->tempFile->isOpen()) && (! this->tempFile->open())) {
-			PRINT("WARNING: Failed to create backup file");
-			return;
-		}
-		return writeBackup(this->tempFile);
+		backupPath.append("unsaved-backup-XXXXXXXX.scad");
+	} else {
+		QFileInfo fileInfo = QFileInfo(this->fileName);
+		backupPath.append(fileInfo.baseName()).append("-backup-XXXXXXXX.").append(fileInfo.suffix());
 	}
 
-	QFileInfo fileInfo = QFileInfo(this->fileName);
+	this->backupFile = new QTemporaryFile(backupPath);
 
-	backupPath.append(fileInfo.baseName())
-			.append("-backup.")
-			.append(fileInfo.suffix());
-
-	QFile file(backupPath);
-
-	if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
-		PRINTB("WARNING: Failed to open backup file for writing: %s (%s)", backupPath.toLocal8Bit().constData() % file.errorString().toLocal8Bit().constData());
+	if ((! this->backupFile->isOpen()) && (! this->backupFile->open())) {
+		PRINT("WARNING: Failed to create backup file");
 		return;
 	}
 
-	writeBackup(&file);
-	file.close();
+	QTextStream writer(this->backupFile);
+	writer.setCodec("UTF-8");
+	writer << this->editor->toPlainText();
+	PRINTB("Saved backup file: %s", this->backupFile->fileName().toLocal8Bit().constData());
+
+	this->backupFile->close();
 }
 
 void MainWindow::actionSave()
@@ -1877,7 +1863,7 @@ void MainWindow::closeEvent(QCloseEvent *event)
 		settings.setValue("window/position", pos());
 		settings_setValueList("window/splitter1sizes",splitter1->sizes());
 		settings_setValueList("window/splitter2sizes",splitter2->sizes());
-		if (tempFile) delete tempFile;
+		if (backupFile) delete backupFile;
 		event->accept();
 	} else {
 		event->ignore();

@@ -89,7 +89,6 @@ private:
 	void loadViewSettings();
 	void loadDesignSettings();
 	void saveBackup();
-	void writeBackup(QFile * file);
 
   class QMessageBox *openglbox;
 
@@ -174,7 +173,7 @@ public slots:
 
 private:
 	static void report_func(const class AbstractNode*, void *vp, int mark);
-	QTemporaryFile * tempFile;
+	QTemporaryFile * backupFile;
 	class ProgressWidget *progresswidget;
 	class CGALWorker *cgalworker;
 	QMutex consolemutex;
