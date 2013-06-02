@@ -37,6 +37,8 @@
 #include "handle_dep.h"
 #include "parsersettings.h"
 #include "rendersettings.h"
+#include "RecoveryDialog.h"
+#include "PlatformUtils.h"
 
 #include <string>
 #include <vector>
@@ -499,6 +501,27 @@ int main(int argc, char **argv)
 
 		QString qfilename;
 		if (filename) qfilename = QString::fromLocal8Bit(boosty::stringy(boosty::absolute(filename)).c_str());
+
+		// Get backup dir and list of backup files
+		fs::path backupDir(PlatformUtils::backupPath());
+		fs::directory_iterator iterartorEnd;
+		vector<fs::path> backupFiles;
+
+		if (fs::exists(backupDir) && fs::is_directory(backupDir)) {
+		    for(fs::directory_iterator iterartor(backupDir); iterartor != iterartorEnd; ++iterartor) {
+			if (fs::is_regular_file(iterartor->status())) {
+			    backupFiles.push_back(*iterartor);
+			}
+		    }
+		}
+
+		if (! backupFiles.empty()) {
+			RecoveryDialog dialog;
+			for (unsigned int index; index < backupFiles.size(); ++index) {
+				dialog.addFile(backupFiles.at(index));
+			}
+			dialog.exec();
+		}
 
 #if 0 /*** disabled by clifford wolf: adds rendering artefacts with OpenCSG ***/
 		// turn on anti-aliasing

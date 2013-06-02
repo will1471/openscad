@@ -185,7 +185,7 @@ FORMS   += src/MainWindow.ui \
            src/Preferences.ui \
            src/OpenCSGWarningDialog.ui \
            src/AboutDialog.ui \
-           src/ProgressWidget.ui
+           src/RecoveryDialog.ui
 
 HEADERS += src/typedefs.h \
            src/version_check.h \
@@ -202,6 +202,7 @@ HEADERS += src/typedefs.h \
            src/Preferences.h \
            src/OpenCSGWarningDialog.h \
            src/AboutDialog.h \
+           src/RecoveryDialog.h \
            src/builtin.h \
            src/context.h \
            src/modcontext.h \
@@ -315,6 +316,7 @@ SOURCES += src/version_check.cc \
            src/highlighter.cc \
            src/Preferences.cc \
            src/OpenCSGWarningDialog.cc \
+           src/RecoveryDialog.cc \
            src/editor.cc \
            src/GLView.cc \
            src/QGLView.cc \
