@@ -185,6 +185,7 @@ FORMS   += src/MainWindow.ui \
            src/Preferences.ui \
            src/OpenCSGWarningDialog.ui \
            src/AboutDialog.ui \
+           src/ProgressWidget.ui \
            src/RecoveryDialog.ui
 
 HEADERS += src/typedefs.h \
